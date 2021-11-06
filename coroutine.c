@@ -1,9 +1,9 @@
 #include "coroutine.h"
 
-void schedule_init(void)
+struct schedule* schedule_init(void)
 {
     struct schedule *sch = malloc(sizeof(struct schedule));
-
+    return sch;
 }
 
 void schedule_run(struct schedule *sch)
@@ -15,6 +15,18 @@ void schedule_run(struct schedule *sch)
         coroutine_resume(ncor);
     }
     return;
+}
+
+void schedule_free(struct schedule *sch)
+{
+    struct coroutine *cor1, *cor2;
+    cor1 = STAILQ_FIRST(&(sch->head));
+    while (cor1 != NULL) {
+        cor2 = STAILQ_NEXT(cor1, entries);
+        coroutine_free(cor1);
+        cor1 = cor2;
+    }
+    free(sch);
 }
 
 void save_regs(void)
@@ -50,7 +62,9 @@ void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
 
 void coroutine_yield(struct coroutine *cor)
 {
-    void *sp;   /* the first local variable */
+    char curr;   /* the first local variable */
+    char *top = cor->sch->stack + STACK_SIZE;
+
     /*
      * para
      * ret
@@ -69,15 +83,46 @@ void coroutine_yield(struct coroutine *cor)
      */
     // cor->ctx.regs[RET] = (void*)((unsigned long)sp - 16);
     swap_regs(&(cor->ctx), &(cor->sch->ctx));
-    save_stack();
+
+
+    int length = top - &curr;
+    if (cor->size < length) {
+        free(cor->stack);
+        cor->stack = malloc(length);
+        cor->size = length;
+    }
+    memcpy(cor->stack, &curr, length);
+
+    cor->status = COROUTINE_SUSPEND;
     STAILQ_INSERT_TAIL(&(cor->sch->head), cor, entries);
+}
+
+void coroutine_run(struct coroutine *cor)
+{
+    cor->fun(cor->args);
+}
+
+void coroutine_free(struct coroutine *cor)
+{
+    if (cor->stack != NULL)
+        free(cor->stack);
+    free(cor);
 }
 
 void coroutine_resume(struct coroutine *cor)
 {
     // assert()
     if(cor->status == COROUTINE_READY) {
-
+        cor->status = COROUTINE_RUNNING;
+        coroutine_run(cor);
+        coroutine_free(cor);
+        return;
     }
-
+    else if (cor->status == COROUTINE_SUSPEND) {
+        swap_regs(&(cor->sch->ctx), &(cor->ctx));
+        memcpy(cor->sch->stack + STACK_SIZE - cor->size, cor->stack, cor->size);
+        cor->status = COROUTINE_RUNNING;
+        return;
+    }
+    exit(1);
 }

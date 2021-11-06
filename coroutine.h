@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <sys/queue.h>
 #include <sys/types.h>
+#include <string.h>
 
 #define COROUTINE_READY     0
 #define COROUTINE_RUNNING   1
@@ -51,6 +52,8 @@ typedef struct schedule {
     struct context ctx;
 }schedule_t;
 
-extern void schedule_init(void);
-extern void coroutine_resume(struct coroutine*cor);
+extern struct schedule* schedule_init(void);
+extern void coroutine_resume(struct coroutine *cor);
+extern void coroutine_free(struct coroutine *cor);
+extern void swapctx(struct context*ctx1, struct context *ctx2);
 #endif
