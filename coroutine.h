@@ -13,17 +13,18 @@
 
 #define STACK_SIZE 1024*1024
 
-typedef void *(*coroutine_fun)(void *);
+struct coroutine;
+typedef void *(*coroutine_fun)(struct coroutine *cor, void *);
 
 enum {
-    RET,
-    EBP,
-    ESP,
-    EDI,
-    ESI,
+    EAX,
     EBX,
     ECX,
-    EDX
+    EDX,
+    EDI,
+    ESI,
+    EBP,
+    ESP
 };
 
 typedef struct context {
@@ -53,6 +54,11 @@ typedef struct schedule {
 }schedule_t;
 
 extern struct schedule* schedule_init(void);
+extern void schedule_run(struct schedule *sch);
+extern void schedule_free(struct schedule *sch);
+
+extern void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args);
+extern void coroutine_yield(struct coroutine *cor);
 extern void coroutine_resume(struct coroutine *cor);
 extern void coroutine_free(struct coroutine *cor);
 extern void swapctx(struct context*ctx1, struct context *ctx2);

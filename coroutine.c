@@ -14,6 +14,8 @@ void schedule_run(struct schedule *sch)
     if (ncor != NULL) {
         coroutine_resume(ncor);
     }
+    
+    schedule_free(sch);
     return;
 }
 
@@ -27,16 +29,6 @@ void schedule_free(struct schedule *sch)
         cor1 = cor2;
     }
     free(sch);
-}
-
-void save_regs(void)
-{
-
-}
-
-void save_stack(void)
-{
-
 }
 
 void swap_regs(struct context *ctx1, struct context *ctx2)
@@ -65,26 +57,6 @@ void coroutine_yield(struct coroutine *cor)
     char curr;   /* the first local variable */
     char *top = cor->sch->stack + STACK_SIZE;
 
-    /*
-     * para
-     * ret
-     * local 
-     */
-    
-    /*
-     * ret = sp - 16
-     * ebp
-     * esp
-     * edi
-     * esi
-     * ebx
-     * ecx
-     * edx
-     */
-    // cor->ctx.regs[RET] = (void*)((unsigned long)sp - 16);
-    swap_regs(&(cor->ctx), &(cor->sch->ctx));
-
-
     int length = top - &curr;
     if (cor->size < length) {
         free(cor->stack);
@@ -95,11 +67,13 @@ void coroutine_yield(struct coroutine *cor)
 
     cor->status = COROUTINE_SUSPEND;
     STAILQ_INSERT_TAIL(&(cor->sch->head), cor, entries);
+
+    swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
 
 void coroutine_run(struct coroutine *cor)
 {
-    cor->fun(cor->args);
+    cor->fun(cor, cor->args);
 }
 
 void coroutine_free(struct coroutine *cor)
