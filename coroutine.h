@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <sys/queue.h>
+#include <sys/types.h>
 
 #define COROUTINE_READY     0
 #define COROUTINE_RUNNING   1
@@ -13,8 +14,19 @@
 
 typedef void *(*coroutine_fun)(void *);
 
+enum {
+    RET,
+    EBP,
+    ESP,
+    EDI,
+    ESI,
+    EBX,
+    ECX,
+    EDX
+};
+
 typedef struct context {
-    void* regs[7];
+    void* regs[8];
 
 }context_t;
 
@@ -40,4 +52,5 @@ typedef struct schedule {
 }schedule_t;
 
 extern void schedule_init(void);
+extern void coroutine_resume(struct coroutine*cor);
 #endif
