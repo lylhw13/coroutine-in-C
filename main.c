@@ -20,7 +20,7 @@ int main()
     struct schedule *sch;
     sch = schedule_init();
 
-    struct args arg1= {0};
+    struct args arg1 = {0};
     struct args arg2 = {100};
 
     coroutine_new(sch, fun, &arg1);

@@ -1,12 +1,12 @@
 CC = gcc
-CFLAGS = -g
+CFLAGS = -m32 -g
 LIBS = 
 
-PROM = coroutine
+PROM = main.out
 
 all: $(PROM)
 
-coroutine: coroutine.h coroutine.c
+main.out: coroutine.h coroutine.c handlectx.S main.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
 clean:

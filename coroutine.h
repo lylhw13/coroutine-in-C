@@ -65,6 +65,7 @@ extern void coroutine_yield(struct coroutine *cor);
 extern void coroutine_resume(struct coroutine *cor);
 extern void coroutine_free(struct coroutine *cor);
 extern void swapctx(struct context*ctx1, struct context *ctx2);
+extern void initctx(struct context *ctx);
 
 #define LOGD(...) fprintf(stderr, __VA_ARGS__)
 #endif

@@ -5,6 +5,7 @@ struct schedule* schedule_init(void)
     struct schedule *sch = malloc(sizeof(struct schedule));
     memset(sch, 0, sizeof(struct schedule));
     STAILQ_INIT(&(sch->head));
+    initctx(&(sch->ctx));
     return sch;
 }
 

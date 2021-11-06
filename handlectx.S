@@ -20,3 +20,17 @@ swapctx:
     movl 28(%eax), %esp
 
     ret
+
+.globl initctx
+    .type initctx, @function
+initctx:
+    movl 4(%esp), %eax     
+    movl %esp, 28(%eax)
+    movl %ebp, 24(%eax)
+    movl %esi, 20(%eax)
+    movl %edi, 16(%eax)
+    movl %edx, 12(%eax)
+    movl %ecx, 8(%eax)
+    movl %ebx, 4(%eax)
+
+    ret
