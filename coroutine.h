@@ -28,6 +28,7 @@ typedef struct coroutine {
     char *stack;
     ssize_t size;
     int status;
+    STAILQ_ENTRY(coroutine) entries;
 } coroutine_t;
 
 STAILQ_HEAD(listhead, coroutine);

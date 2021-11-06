@@ -6,6 +6,11 @@ void schedule_init(void)
 
 }
 
+void schedule_run(void)
+{
+    return;
+}
+
 void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
 {
     struct coroutine *cor = malloc(sizeof(struct coroutine));
@@ -15,5 +20,23 @@ void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
     cor->sch = sch;
     cor->stack = NULL;
     cor->size = 0;
-    cor->statuc = COROUTINE_READY;
+    cor->status = COROUTINE_READY;
+    STAILQ_INSERT_TAIL(&(sch->head), cor, entries);
+}
+
+void coroutine_yield(struct coroutine *cor)
+{
+    char *sp;
+    /*
+     * ret = sp - 16
+     * ebp
+     * esp
+     *  
+     */
+
+}
+
+void coroutine_resume()
+{
+
 }
