@@ -3,6 +3,8 @@
 struct schedule* schedule_init(void)
 {
     struct schedule *sch = malloc(sizeof(struct schedule));
+    memset(sch, 0, sizeof(struct schedule));
+    STAILQ_INIT(&(sch->head));
     return sch;
 }
 
@@ -14,7 +16,7 @@ void schedule_run(struct schedule *sch)
     if (ncor != NULL) {
         coroutine_resume(ncor);
     }
-    
+
     schedule_free(sch);
     return;
 }
@@ -31,13 +33,13 @@ void schedule_free(struct schedule *sch)
     free(sch);
 }
 
-void swap_regs(struct context *ctx1, struct context *ctx2)
-{
-    /*
-     * save current regs to ctx1
-     * change ctx2 to current 
-     */
-}
+// void swap_regs(struct context *ctx1, struct context *ctx2)
+// {
+//     /*
+//      * save current regs to ctx1
+//      * change ctx2 to current 
+//      */
+// }
 
 void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
 {
@@ -59,7 +61,8 @@ void coroutine_yield(struct coroutine *cor)
 
     int length = top - &curr;
     if (cor->size < length) {
-        free(cor->stack);
+        if (cor->stack != NULL)
+            free(cor->stack);
         cor->stack = malloc(length);
         cor->size = length;
     }
@@ -93,7 +96,7 @@ void coroutine_resume(struct coroutine *cor)
         return;
     }
     else if (cor->status == COROUTINE_SUSPEND) {
-        swap_regs(&(cor->sch->ctx), &(cor->ctx));
+        swapctx(&(cor->sch->ctx), &(cor->ctx));
         memcpy(cor->sch->stack + STACK_SIZE - cor->size, cor->stack, cor->size);
         cor->status = COROUTINE_RUNNING;
         return;

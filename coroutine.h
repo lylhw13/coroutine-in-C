@@ -5,6 +5,9 @@
 #include <sys/queue.h>
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 
 #define COROUTINE_READY     0
 #define COROUTINE_RUNNING   1
@@ -14,7 +17,7 @@
 #define STACK_SIZE 1024*1024
 
 struct coroutine;
-typedef void *(*coroutine_fun)(struct coroutine *cor, void *);
+typedef void (*coroutine_fun)(struct coroutine *cor, void *);
 
 enum {
     EAX,
@@ -62,4 +65,6 @@ extern void coroutine_yield(struct coroutine *cor);
 extern void coroutine_resume(struct coroutine *cor);
 extern void coroutine_free(struct coroutine *cor);
 extern void swapctx(struct context*ctx1, struct context *ctx2);
+
+#define LOGD(...) fprintf(stderr, __VA_ARGS__)
 #endif

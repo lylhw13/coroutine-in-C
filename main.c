@@ -26,6 +26,6 @@ int main()
     coroutine_new(sch, fun, &arg1);
     coroutine_new(sch, fun, &arg2);
     schedule_run(sch);
-    
+
     return 0;
 }
