@@ -27,7 +27,9 @@ typedef struct context {
 #elif defined(__x86_64__)
     void* regs[17];
 #endif
-
+    void * ss_sp;
+    size_t ss_size;
+    
 }context_t;
 
 struct args{

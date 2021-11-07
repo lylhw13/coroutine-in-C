@@ -85,26 +85,18 @@ void coroutine_free(struct coroutine *cor)
 #if defined(__i386__)
 void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 {
-    /*
-     * para
-     * ret
-     * local 
-     */
-    /* make the ctx to ready run */
-    // LOGD("%s\n", __FUNCTION__);
-    struct coroutine *cor = (struct coroutine *)para1;
-
     void *sp;
-    sp = (char *)(cor->sch->stack + STACK_SIZE);
+    void **para_addr, **ip_addr;
+
+    sp = (void *)(ctx->ss_sp + ctx->ss_size - sizeof(void *));
     /* align stack and make space */
     sp = (char*)((unsigned long)sp & -16L);
 
-    void **para = (void**)(sp - sizeof(void *)*2);
-    *para = (void*)cor;
+    para_addr = (void**)(sp - sizeof(void *)*2);
+    *para_addr = para1;
 
-    void **ret_addr;
-    ret_addr = (void**)(sp - sizeof(void *)*4);
-    *ret_addr = (void *)fun;
+    ip_addr = (void **)(sp - sizeof(void *)*4);
+    *ip_addr = fun;
 
     ctx->regs[oESP/psize] = (void*)(sp - sizeof(void *)*4);
     return;
@@ -113,20 +105,19 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 
 void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 {
-    struct coroutine *cor = (struct coroutine *)para1;
-
     void *sp;
-    sp = (char *)(cor->sch->stack + STACK_SIZE - sizeof(void *) * 2);
+    void **ip_addr; /* instruction pointer */
+
+    sp = (void *)(ctx->ss_sp + ctx->ss_size - sizeof(void *));
     /* align stack and make space */
-    sp = (char*)((unsigned long)sp & -16LL);
+    sp = (char*)((unsigned long)sp & -16L);
 
-    void **ret_addr;
-    ret_addr = (void **)sp;
-    *ret_addr = (void*)fun;
+    ip_addr = (void **)sp;
+    *ip_addr = fun;
 
-    ctx->regs[oRDI/psize] = (void*)cor;     /* para */
-    ctx->regs[oRIP/psize] = (void *)fun;
-    ctx->regs[oRSP/psize] = (void*)sp;
+    ctx->regs[oRDI/psize] = para1;
+    ctx->regs[oRIP/psize] = fun;
+    ctx->regs[oRSP/psize] = sp;
 
     return;
 }
@@ -134,11 +125,9 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 
 static void mainfun(struct coroutine*cor)
 {
-    // cor->fun(cor, cor->args);
     cor->fun(cor);
     coroutine_free(cor);
     LOGD("%s\n", "after run");
-    // exit(0);
     swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
 
@@ -151,8 +140,10 @@ void coroutine_resume(struct coroutine *cor)
 
     if(cor->status == COROUTINE_READY) {
         cor->status = COROUTINE_RUNNING;
+        cor->ctx.ss_sp = cor->sch->stack;
+        cor->ctx.ss_size = STACK_SIZE;
+
         makectx(&(cor->ctx), mainfun, cor);
-        // LOGD("swapctx\n");
         swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;
     }
