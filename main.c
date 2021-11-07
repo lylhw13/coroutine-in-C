@@ -15,6 +15,7 @@ void fun(struct coroutine *cor)
         printf("i %d\n", start + i);
         coroutine_yield(cor);
     }
+    // exit(0);
 }
 
 int main()

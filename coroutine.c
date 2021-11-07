@@ -29,6 +29,7 @@ void schedule_run(struct schedule *sch)
         coroutine_resume(cor);
     }
 
+    LOGD("%s\n", "after all");
     // schedule_free(sch);
     return;
 }
@@ -104,18 +105,21 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
     struct coroutine *cor = (struct coroutine *)para1;
 
     void *sp;
-    sp = (char *)(cor->sch->stack + STACK_SIZE - sizeof(void *)*2);
+    sp = (char *)(cor->sch->stack + STACK_SIZE - sizeof(void *)*2 );
     /* align stack and make space for trampoline address */
     sp = (char*)((unsigned long)sp & -16L);
+    void **ebp = (void**)sp;
+    *ebp = NULL;
 
-    void **para = (void **)sp;
+    void **para = (void**)(sp - sizeof(void *)*2);
     *para = (void*)cor;
 
     void **ret_addr;
-    ret_addr = (void**)(sp - sizeof(void *)*2);
+    ret_addr = (void**)(sp - sizeof(void *)*4);
     *ret_addr = (void *)fun;
 
-    ctx->regs[ESP] = (void*)(sp - sizeof(void *)*2);
+    // ctx->regs[EBP] = (void*)sp;
+    ctx->regs[ESP] = (void*)(sp - sizeof(void *)*4);
     return;
 }
 
@@ -123,7 +127,10 @@ static void mainfun(struct coroutine*cor)
 {
     // cor->fun(cor, cor->args);
     cor->fun(cor);
-    // coroutine_free(cor);
+    coroutine_free(cor);
+    LOGD("%s\n", "after run");
+    // exit(0);
+    swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
 
 
