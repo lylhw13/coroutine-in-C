@@ -56,7 +56,7 @@ typedef struct context {
 #if defined(__i386__)
     void* regs[8];
 #elif defined(__x86_64__)
-    void* regs[18];
+    void* regs[17];
 #endif
     // char *stack;
     // size_t ss_size;

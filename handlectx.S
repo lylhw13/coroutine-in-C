@@ -33,6 +33,8 @@ swapctx:
     movq %r14, oR14(%rdi)
     movq %r15, oR15(%rdi)
 
+    movq %rdi, oRDI(%rdi)
+    movq %rsi, oRSI(%rsi)
     movq %rdx, oRDX(%rdi)
     movq %rcx, oRCX(%rdi)
     movq %r8, oR8(%rdi)
@@ -40,8 +42,7 @@ swapctx:
 
     movq (%rsp), %rcx
     movq %rcx, oRIP(%rdi)
-    leaq 8(%rsp), %rcx
-    movq %rcx, oRSP(%rdi)
+    movq %rsp, oRSP(%rdi)
 
     movq oRBX(%rsi), %rbx
     movq oRBP(%rsi), %rbp
@@ -50,15 +51,18 @@ swapctx:
     movq oR14(%rsi), %r14
     movq oR15(%rsi), %r15
 
+    movq oRSP(%rsi), %rsp
     movq oRIP(%rsi), %rcx
     movq %rcx, (%rsp)
-    movq oRSP(%rsi), %rcx 
-    movq %rcx, 8(%rsp)
 
+    movq oRDI(%rsi), %rdi
     movq oRDX(%rsi), %rdx
     movq oRCX(%rsi), %rcx 
     movq oR8(%rsi), %r8 
     movq oR9(%rsi), %r9 
+ 
+    movq %rsi, %r10
+    movq oRSI(%r10), %rsi
 
     xorl %eax, %eax
     ret

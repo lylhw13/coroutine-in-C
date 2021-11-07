@@ -16,8 +16,8 @@
 #define oRDI 40
 #define oRBP 48
 #define oRSP 56
-#define oR8 64
-#define oR9 72
+#define oR8  64
+#define oR9  72
 #define oR10 80
 #define oR11 88
 #define oR12 96
