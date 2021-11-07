@@ -6,6 +6,7 @@
 #define oESI 20
 #define oEBP 24
 #define oESP 28
+#define oEIP 32
 
 
 #define oRAX 0

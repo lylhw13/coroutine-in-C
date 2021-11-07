@@ -56,9 +56,12 @@ void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
 void coroutine_yield(struct coroutine *cor)
 {
     char curr;   /* the first local variable */
-    char *top = cor->sch->stack + STACK_SIZE;
+    char *top;
+    int length;
 
-    int length = top - &curr;
+    top = cor->sch->stack + STACK_SIZE;
+    length = top - &curr;
+    
     if (cor->size < length) {
         if (cor->stack != NULL)
             free(cor->stack);
@@ -92,12 +95,15 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
     /* align stack and make space */
     sp = (char*)((unsigned long)sp & -16L);
 
+    /* para in the stack */
     para_addr = (void**)(sp - sizeof(void *)*2);
     *para_addr = para1;
 
+    /* make the esp point to the function ready to run  */
     ip_addr = (void **)(sp - sizeof(void *)*4);
     *ip_addr = fun;
 
+    ctx->regs[oEIP/psize] = fun;
     ctx->regs[oESP/psize] = (void*)(sp - sizeof(void *)*4);
     return;
 }
@@ -112,6 +118,7 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
     /* align stack and make space */
     sp = (char*)((unsigned long)sp & -16L);
 
+    /* make the rsp point to the function ready to run  */
     ip_addr = (void **)sp;
     *ip_addr = fun;
 
@@ -127,17 +134,13 @@ static void mainfun(struct coroutine*cor)
 {
     cor->fun(cor);
     coroutine_free(cor);
-    LOGD("%s\n", "after run");
+    /* return the contorl to schedule */
     swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
 
 
 void coroutine_resume(struct coroutine *cor)
 {
-    // LOGD("%s\n", __FUNCTION__);
-    // LOGD("%s %d\n",__FUNCTION__, ((struct args*)(cor->args))->n);
-
-
     if(cor->status == COROUTINE_READY) {
         cor->status = COROUTINE_RUNNING;
         cor->ctx.ss_sp = cor->sch->stack;

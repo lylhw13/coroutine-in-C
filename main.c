@@ -1,13 +1,11 @@
 #include "coroutine.h"
 
-// struct args{
-//     int n;
-// };
+struct args{
+    int n;
+};
 
-// void fun(struct coroutine*cor, void *para)
 void fun(struct coroutine *cor)
 {
-    // LOGD("%s\n", __FUNCTION__);
     struct args *parg = (struct args *)(cor->args);
     int start = parg->n;
     int i;
@@ -27,10 +25,12 @@ int main()
     struct args arg1 = {0};
     struct args arg2 = {100};
     struct args arg3 = {200};
+    struct args arg4 = {300};
 
     coroutine_new(sch, fun, &arg1);
     coroutine_new(sch, fun, &arg2);
     coroutine_new(sch, fun, &arg3);
+    coroutine_new(sch, fun, &arg4);
     // STAILQ_FOREACH(cor, &(sch->head), entries)
     //     LOGD("arg n is %d\n", ((struct args *)(cor->args))->n);
     schedule_run(sch);

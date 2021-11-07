@@ -13,15 +13,22 @@ swapctx:
     movl %esi, oESI(%eax)
     movl %ebp, oEBP(%eax)
     movl %esp, oESP(%eax)
+    
+    movl (%esp), %ecx 
+    movl %ecx, oEIP(%eax)
 
-    movl  8(%esp), %eax     
+    movl  8(%esp), %eax 
+
+    movl oESP(%eax), %esp
+    movl oEIP(%eax), %ecx
+    movl %ecx, (%esp)  
+
     movl oEBX(%eax), %ebx
     movl oECX(%eax), %ecx
     movl oEDX(%eax), %edx
     movl oEDI(%eax), %edi 
     movl oESI(%eax), %esi
     movl oEBP(%eax), %ebp
-    movl oESP(%eax), %esp
 
     ret
     
