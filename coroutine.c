@@ -5,18 +5,19 @@ struct schedule* schedule_init(void)
     struct schedule *sch = malloc(sizeof(struct schedule));
     memset(sch, 0, sizeof(struct schedule));
     STAILQ_INIT(&(sch->head));
-    // initctx(&(sch->ctx));
     return sch;
 }
 
 void schedule_run(struct schedule *sch)
 {
-    initctx(&(sch->ctx));
-    struct coroutine *ncor = STAILQ_FIRST(&(sch->head));
+    struct coroutine *cor;
+    cor = STAILQ_FIRST(&(sch->head));
     STAILQ_REMOVE_HEAD(&(sch->head), entries);
 
-    if (ncor != NULL) {
-        coroutine_resume(ncor);
+    while (cor != NULL) {
+        coroutine_resume(cor);
+        cor = STAILQ_FIRST(&(sch->head));
+        STAILQ_REMOVE_HEAD(&(sch->head), entries);
     }
 
     schedule_free(sch);
@@ -68,10 +69,10 @@ void coroutine_yield(struct coroutine *cor)
     swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
 
-void coroutine_run(struct coroutine *cor)
-{
-    cor->fun(cor, cor->args);
-}
+// void coroutine_run(struct coroutine *cor)
+// {
+//     cor->fun(cor, cor->args);
+// }
 
 void coroutine_free(struct coroutine *cor)
 {
@@ -80,20 +81,53 @@ void coroutine_free(struct coroutine *cor)
     free(cor);
 }
 
+void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
+// void make_ctx(struct coroutine *cor)
+{
+    /*
+     * para
+     * ret
+     * local 
+     */
+    /* make the ctx to ready run */
+    struct coroutine *cor = (struct coroutine *)para1;
+
+    char *sp;
+    sp = (char *)(cor->sch->stack + STACK_SIZE);
+    /* align stack and make space for trampoline address */
+    sp = (char*)(((unsigned long)sp & -16L));
+    void **para;
+    para = (void**)(sp - sizeof(void *));
+    *para = cor;
+
+    void **ret_addr;
+    ret_addr = (void**)(sp - sizeof(void *) * 2);
+    *ret_addr = fun;
+
+    ctx->regs[ESP] = (void*)(sp - sizeof(void *) * 2);
+    return;
+}
+
+static void mainfun(struct coroutine*cor)
+{
+    cor->fun(cor, cor->args);
+    coroutine_free(cor);
+}
+
+
 void coroutine_resume(struct coroutine *cor)
 {
     // assert()
     if(cor->status == COROUTINE_READY) {
         cor->status = COROUTINE_RUNNING;
-        // initctx(&(cor->sch->ctx));
-        coroutine_run(cor);
-        coroutine_free(cor);
+        make_ctx(&(cor->ctx), mainfun, cor);
+        swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;
     }
     else if (cor->status == COROUTINE_SUSPEND) {
-        swapctx(&(cor->sch->ctx), &(cor->ctx));
-        memcpy(cor->sch->stack + STACK_SIZE - cor->size, cor->stack, cor->size);
         cor->status = COROUTINE_RUNNING;
+        memcpy(cor->sch->stack + STACK_SIZE - cor->size, cor->stack, cor->size);
+        swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;
     }
     exit(1);

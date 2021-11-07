@@ -32,7 +32,8 @@ enum {
 
 typedef struct context {
     void* regs[8];
-
+    // char *stack;
+    // size_t ss_size;
 }context_t;
 
 struct schedule;
