@@ -1,4 +1,5 @@
 #include "coroutine.h"
+#include "ucontext_i.h"
 
 struct schedule* schedule_init(void)
 {
@@ -111,6 +112,39 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
     return;
 }
 #elif defined(__x86_64__)
+
+void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
+{
+    /*
+     * para
+     * ret
+     * local 
+     */
+    /* make the ctx to ready run */
+    LOGD("%s\n", __FUNCTION__);
+    struct coroutine *cor = (struct coroutine *)para1;
+
+    void *sp;
+    sp = (char *)(cor->sch->stack + STACK_SIZE - sizeof(void *));
+    /* align stack and make space */
+    sp = (char*)((unsigned long)sp & -16LL);
+
+    ctx->regs[oRDI/8] = (void*)cor;
+
+    // void **ret_addr;
+    // ret_addr = (void**)(sp - sizeof(void *)*2);
+    // *ret_addr = (void *)fun;
+    void **ret_addr;
+    ret_addr = (void **)sp;
+    *ret_addr = (void*)fun;
+
+    ctx->regs[oRIP/8] = (void *)fun;
+    ctx->regs[oRSP/8] = (void*)sp;
+
+
+    // ctx->regs[oRSP/8] = (void*)(sp - sizeof(void *)*2);
+    return;
+}
 #endif
 
 static void mainfun(struct coroutine*cor)
@@ -127,12 +161,13 @@ static void mainfun(struct coroutine*cor)
 void coroutine_resume(struct coroutine *cor)
 {
     // LOGD("%s\n", __FUNCTION__);
-    // LOGD("%s %d\n",__FUNCTION__, ((struct args*)(cor->args))->n);
+    LOGD("%s %d\n",__FUNCTION__, ((struct args*)(cor->args))->n);
 
 
     if(cor->status == COROUTINE_READY) {
         cor->status = COROUTINE_RUNNING;
         make_ctx(&(cor->ctx), mainfun, cor);
+        LOGD("swapctx\n");
         swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;
     }
