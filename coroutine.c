@@ -1,6 +1,8 @@
 #include "coroutine.h"
 #include "ucontext_i.h"
 
+static int psize = sizeof(void *);
+
 struct schedule* schedule_init(void)
 {
     struct schedule *sch = malloc(sizeof(struct schedule));
@@ -71,10 +73,7 @@ void coroutine_yield(struct coroutine *cor)
     swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
 
-// void coroutine_run(struct coroutine *cor)
-// {
-//     cor->fun(cor, cor->args);
-// }
+
 
 void coroutine_free(struct coroutine *cor)
 {
@@ -84,8 +83,7 @@ void coroutine_free(struct coroutine *cor)
 }
 
 #if defined(__i386__)
-void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
-// void make_ctx(struct coroutine *cor)
+void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 {
     /*
      * para
@@ -108,20 +106,13 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
     ret_addr = (void**)(sp - sizeof(void *)*4);
     *ret_addr = (void *)fun;
 
-    ctx->regs[ESP] = (void*)(sp - sizeof(void *)*4);
+    ctx->regs[oESP/psize] = (void*)(sp - sizeof(void *)*4);
     return;
 }
 #elif defined(__x86_64__)
 
-void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
+void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 {
-    /*
-     * para
-     * ret
-     * local 
-     */
-    /* make the ctx to ready run */
-    // LOGD("%s\n", __FUNCTION__);
     struct coroutine *cor = (struct coroutine *)para1;
 
     void *sp;
@@ -133,12 +124,10 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
     ret_addr = (void **)sp;
     *ret_addr = (void*)fun;
 
-    ctx->regs[oRDI/8] = (void*)cor;     /* para */
-    ctx->regs[oRIP/8] = (void *)fun;
-    ctx->regs[oRSP/8] = (void*)sp;
+    ctx->regs[oRDI/psize] = (void*)cor;     /* para */
+    ctx->regs[oRIP/psize] = (void *)fun;
+    ctx->regs[oRSP/psize] = (void*)sp;
 
-
-    // ctx->regs[oRSP/8] = (void*)(sp - sizeof(void *)*2);
     return;
 }
 #endif
@@ -162,7 +151,7 @@ void coroutine_resume(struct coroutine *cor)
 
     if(cor->status == COROUTINE_READY) {
         cor->status = COROUTINE_RUNNING;
-        make_ctx(&(cor->ctx), mainfun, cor);
+        makectx(&(cor->ctx), mainfun, cor);
         // LOGD("swapctx\n");
         swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;

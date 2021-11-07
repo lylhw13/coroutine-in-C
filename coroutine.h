@@ -19,37 +19,6 @@
 struct coroutine;
 typedef void (*coroutine_fun)(struct coroutine *cor);
 
-#if defined(__i386__)
-enum {
-    EAX,
-    EBX,
-    ECX,
-    EDX,
-    EDI,
-    ESI,
-    EBP,
-    ESP
-};
-#elif defined(__x86_64__)
-enum {
-    RAX,
-    RBX,
-    RCX,
-    RDX,
-    RSI,
-    RDI,
-    RBP,
-    RSP,
-    R8,
-    R9,
-    R10,
-    R11,
-    R12,
-    R13,
-    R14,
-    R15
-};
-#endif
 
 typedef struct context {
 
@@ -58,8 +27,7 @@ typedef struct context {
 #elif defined(__x86_64__)
     void* regs[17];
 #endif
-    // char *stack;
-    // size_t ss_size;
+
 }context_t;
 
 struct args{
@@ -98,4 +66,5 @@ extern void coroutine_free(struct coroutine *cor);
 extern void swapctx(struct context*ctx1, struct context *ctx2);
 
 #define LOGD(...) fprintf(stderr, __VA_ARGS__)
+
 #endif

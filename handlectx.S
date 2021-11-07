@@ -26,6 +26,7 @@ swapctx:
     ret
     
 #elif defined(__x86_64__)
+    /*save registers */
     movq %rbx, oRBX(%rdi)
     movq %rbp, oRBP(%rdi)
     movq %r12, oR12(%rdi)
@@ -40,10 +41,14 @@ swapctx:
     movq %r8, oR8(%rdi)
     movq %r9, oR9(%rdi)
 
+    /* save rip */
     movq (%rsp), %rcx
     movq %rcx, oRIP(%rdi)
+
     movq %rsp, oRSP(%rdi)
 
+
+    /* setup registers*/
     movq oRBX(%rsi), %rbx
     movq oRBP(%rsi), %rbp
     movq oR12(%rsi), %r12
@@ -52,6 +57,7 @@ swapctx:
     movq oR15(%rsi), %r15
 
     movq oRSP(%rsi), %rsp
+    /* setup rip */
     movq oRIP(%rsi), %rcx
     movq %rcx, (%rsp)
 
@@ -64,6 +70,7 @@ swapctx:
     movq %rsi, %r10
     movq oRSI(%r10), %rsi
 
+    /* clear rax to indicate success */
     xorl %eax, %eax
     ret
 

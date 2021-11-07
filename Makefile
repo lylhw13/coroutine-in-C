@@ -1,6 +1,6 @@
 CC = gcc
-# CFLAGS = -m32 -g
-CFLAGS = -g
+CFLAGS = -m32 -g
+# CFLAGS = -g
 LIBS = 
 
 PROM = main.out
