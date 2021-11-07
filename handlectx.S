@@ -1,22 +1,30 @@
+#include "ucontext_i.h"
+
 .globl swapctx
     .type swapctx, @function
 swapctx:
+
+#if defined(__i386__)
     movl 4(%esp), %eax     
-    movl %esp, 28(%eax)
-    movl %ebp, 24(%eax)
-    movl %esi, 20(%eax)
-    movl %edi, 16(%eax)
-    movl %edx, 12(%eax)
-    movl %ecx, 8(%eax)
-    movl %ebx, 4(%eax)
+    movl %ebx, oEBX(%eax)
+    movl %ecx, oECX(%eax)
+    movl %edx, oEDX(%eax)
+    movl %edi, oEDI(%eax)
+    movl %esi, oESI(%eax)
+    movl %ebp, oEBP(%eax)
+    movl %esp, oESP(%eax)
 
     movl  8(%esp), %eax     
-    movl  4(%eax), %ebx
-    movl  8(%eax), %ecx
-    movl 12(%eax), %edx
-    movl 16(%eax), %edi 
-    movl 20(%eax), %esi
-    movl 24(%eax), %ebp
-    movl 28(%eax), %esp
+    movl oEBX(%eax), %ebx
+    movl oECX(%eax), %ecx
+    movl oEDX(%eax), %edx
+    movl oEDI(%eax), %edi 
+    movl oESI(%eax), %esi
+    movl oEBP(%eax), %ebp
+    movl oESP(%eax), %esp
 
     ret
+#elif defined(__x86_64__)
+    movq %rbx, oRBX(%rdi)
+
+#endif

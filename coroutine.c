@@ -82,6 +82,7 @@ void coroutine_free(struct coroutine *cor)
     free(cor);
 }
 
+#if defined(__i386__)
 void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 // void make_ctx(struct coroutine *cor)
 {
@@ -109,6 +110,8 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
     ctx->regs[ESP] = (void*)(sp - sizeof(void *)*4);
     return;
 }
+#elif defined(__x86_64__)
+#endif
 
 static void mainfun(struct coroutine*cor)
 {

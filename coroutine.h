@@ -19,6 +19,7 @@
 struct coroutine;
 typedef void (*coroutine_fun)(struct coroutine *cor);
 
+#if defined(__i386__)
 enum {
     EAX,
     EBX,
@@ -29,9 +30,34 @@ enum {
     EBP,
     ESP
 };
+#elif defined(__x86_64__)
+enum {
+    RAX,
+    RBX,
+    RCX,
+    RDX,
+    RSI,
+    RDI,
+    RBP,
+    RSP,
+    R8,
+    R9,
+    R10,
+    R11,
+    R12,
+    R13,
+    R14,
+    R15
+};
+#endif
 
 typedef struct context {
+
+#if defined(__i386__)
     void* regs[8];
+#elif defined(__x86_65__)
+    void* regs[16];
+#endif
     // char *stack;
     // size_t ss_size;
 }context_t;
@@ -70,7 +96,6 @@ extern void coroutine_yield(struct coroutine *cor);
 extern void coroutine_resume(struct coroutine *cor);
 extern void coroutine_free(struct coroutine *cor);
 extern void swapctx(struct context*ctx1, struct context *ctx2);
-extern void initctx(struct context *ctx);
 
 #define LOGD(...) fprintf(stderr, __VA_ARGS__)
 #endif

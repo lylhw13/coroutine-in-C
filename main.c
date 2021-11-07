@@ -29,11 +29,7 @@ int main()
     struct args arg3 = {200};
 
     coroutine_new(sch, fun, &arg1);
-    // STAILQ_FOREACH(cor, &(sch->head), entries)
-    //     LOGD("arg n is %d\n", ((struct args *)(cor->args))->n);
     coroutine_new(sch, fun, &arg2);
-    // STAILQ_FOREACH(cor, &(sch->head), entries)
-    //     LOGD("arg n is %d\n", ((struct args *)(cor->args))->n);
     coroutine_new(sch, fun, &arg3);
     // STAILQ_FOREACH(cor, &(sch->head), entries)
     //     LOGD("arg n is %d\n", ((struct args *)(cor->args))->n);
