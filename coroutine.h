@@ -36,6 +36,10 @@ typedef struct context {
     // size_t ss_size;
 }context_t;
 
+struct args{
+    int n;
+};
+
 struct schedule;
 
 typedef struct coroutine {

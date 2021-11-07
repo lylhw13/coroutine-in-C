@@ -10,17 +10,26 @@ struct schedule* schedule_init(void)
 
 void schedule_run(struct schedule *sch)
 {
-    struct coroutine *cor;
-    cor = STAILQ_FIRST(&(sch->head));
-    STAILQ_REMOVE_HEAD(&(sch->head), entries);
+    // struct coroutine *cor;
+    // cor = STAILQ_FIRST(&(sch->head));
+    // STAILQ_REMOVE_HEAD(&(sch->head), entries);
+    // LOGD("%d\n", ((struct args*)(cor->args))->n);
 
-    while (cor != NULL) {
-        coroutine_resume(cor);
+    // while (cor != NULL) {
+    //     coroutine_resume(cor);
+    //     cor = STAILQ_FIRST(&(sch->head));
+    //     STAILQ_REMOVE_HEAD(&(sch->head), entries);
+    // }
+    while (1) {
+        struct coroutine *cor;
         cor = STAILQ_FIRST(&(sch->head));
+        if (cor == NULL)
+            break;
         STAILQ_REMOVE_HEAD(&(sch->head), entries);
+        coroutine_resume(cor);
     }
 
-    schedule_free(sch);
+    // schedule_free(sch);
     return;
 }
 
@@ -47,6 +56,7 @@ void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
     cor->size = 0;
     cor->status = COROUTINE_READY;
     STAILQ_INSERT_TAIL(&(sch->head), cor, entries);
+
 }
 
 void coroutine_yield(struct coroutine *cor)
@@ -90,34 +100,38 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
      * local 
      */
     /* make the ctx to ready run */
+    LOGD("%s\n", __FUNCTION__);
     struct coroutine *cor = (struct coroutine *)para1;
 
     char *sp;
-    sp = (char *)(cor->sch->stack + STACK_SIZE);
+    sp = (char *)(cor->sch->stack + STACK_SIZE );
     /* align stack and make space for trampoline address */
-    sp = (char*)(((unsigned long)sp & -16L));
+    sp = (char*)((unsigned long)sp & -16L);
     void **para;
     para = (void**)(sp - sizeof(void *));
-    *para = cor;
+    *para = (void*)cor;
 
     void **ret_addr;
     ret_addr = (void**)(sp - sizeof(void *) * 2);
-    *ret_addr = fun;
+    *ret_addr = (void *)fun;
 
-    ctx->regs[ESP] = (void*)(sp - sizeof(void *) * 2);
+    ctx->regs[ESP] = (void*)sp - sizeof(void *) * 2;
     return;
 }
 
 static void mainfun(struct coroutine*cor)
 {
     cor->fun(cor, cor->args);
-    coroutine_free(cor);
+    // coroutine_free(cor);
 }
 
 
 void coroutine_resume(struct coroutine *cor)
 {
-    // assert()
+    // LOGD("%s\n", __FUNCTION__);
+    LOGD("%s %d\n",__FUNCTION__, ((struct args*)(cor->args))->n);
+
+
     if(cor->status == COROUTINE_READY) {
         cor->status = COROUTINE_RUNNING;
         make_ctx(&(cor->ctx), mainfun, cor);
@@ -130,5 +144,5 @@ void coroutine_resume(struct coroutine *cor)
         swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;
     }
-    exit(1);
+    // exit(1);
 }
