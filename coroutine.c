@@ -100,28 +100,29 @@ void make_ctx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1
      * local 
      */
     /* make the ctx to ready run */
-    LOGD("%s\n", __FUNCTION__);
+    // LOGD("%s\n", __FUNCTION__);
     struct coroutine *cor = (struct coroutine *)para1;
 
-    char *sp;
-    sp = (char *)(cor->sch->stack + STACK_SIZE );
+    void *sp;
+    sp = (char *)(cor->sch->stack + STACK_SIZE - sizeof(void *)*2);
     /* align stack and make space for trampoline address */
     sp = (char*)((unsigned long)sp & -16L);
-    void **para;
-    para = (void**)(sp - sizeof(void *));
+
+    void **para = (void **)sp;
     *para = (void*)cor;
 
     void **ret_addr;
-    ret_addr = (void**)(sp - sizeof(void *) * 2);
+    ret_addr = (void**)(sp - sizeof(void *)*2);
     *ret_addr = (void *)fun;
 
-    ctx->regs[ESP] = (void*)sp - sizeof(void *) * 2;
+    ctx->regs[ESP] = (void*)(sp - sizeof(void *)*2);
     return;
 }
 
 static void mainfun(struct coroutine*cor)
 {
-    cor->fun(cor, cor->args);
+    // cor->fun(cor, cor->args);
+    cor->fun(cor);
     // coroutine_free(cor);
 }
 
@@ -129,7 +130,7 @@ static void mainfun(struct coroutine*cor)
 void coroutine_resume(struct coroutine *cor)
 {
     // LOGD("%s\n", __FUNCTION__);
-    LOGD("%s %d\n",__FUNCTION__, ((struct args*)(cor->args))->n);
+    // LOGD("%s %d\n",__FUNCTION__, ((struct args*)(cor->args))->n);
 
 
     if(cor->status == COROUTINE_READY) {

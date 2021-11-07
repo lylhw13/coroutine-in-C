@@ -17,7 +17,7 @@
 #define STACK_SIZE 1024*1024
 
 struct coroutine;
-typedef void (*coroutine_fun)(struct coroutine *cor, void *);
+typedef void (*coroutine_fun)(struct coroutine *cor);
 
 enum {
     EAX,

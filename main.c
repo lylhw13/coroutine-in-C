@@ -4,10 +4,11 @@
 //     int n;
 // };
 
-void fun(struct coroutine*cor, void *para)
+// void fun(struct coroutine*cor, void *para)
+void fun(struct coroutine *cor)
 {
-    LOGD("%s\n", __FUNCTION__);
-    struct args *parg = (struct args *)para;
+    // LOGD("%s\n", __FUNCTION__);
+    struct args *parg = (struct args *)(cor->args);
     int start = parg->n;
     int i;
     for (i = 0; i< 3; ++i) {
