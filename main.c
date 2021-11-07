@@ -13,7 +13,6 @@ void fun(struct coroutine *cor)
         printf("i %d\n", start + i);
         coroutine_yield(cor);
     }
-    // exit(0);
 }
 
 int main()
@@ -22,15 +21,13 @@ int main()
     struct schedule *sch;
     sch = schedule_init();
 
-    struct args arg1 = {0};
-    struct args arg2 = {100};
-    struct args arg3 = {200};
-    struct args arg4 = {300};
+    struct args arg1 = {100};
+    struct args arg2 = {200};
+    struct args arg3 = {300};
 
     coroutine_new(sch, fun, &arg1);
     coroutine_new(sch, fun, &arg2);
     coroutine_new(sch, fun, &arg3);
-    coroutine_new(sch, fun, &arg4);
     // STAILQ_FOREACH(cor, &(sch->head), entries)
     //     LOGD("arg n is %d\n", ((struct args *)(cor->args))->n);
     schedule_run(sch);
