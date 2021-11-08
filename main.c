@@ -17,7 +17,6 @@ void fun(struct coroutine *cor)
 
 int main()
 {
-    struct coroutine *cor;
     struct schedule *sch;
     sch = schedule_init();
 
@@ -28,8 +27,8 @@ int main()
     coroutine_new(sch, fun, &arg1);
     coroutine_new(sch, fun, &arg2);
     coroutine_new(sch, fun, &arg3);
-    // STAILQ_FOREACH(cor, &(sch->head), entries)
-    //     LOGD("arg n is %d\n", ((struct args *)(cor->args))->n);
+
+
     schedule_run(sch);
 
     return 0;
