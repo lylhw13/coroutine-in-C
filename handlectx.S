@@ -5,6 +5,7 @@
 swapctx:
 
 #if defined(__i386__)
+    /* save registers to first parameter */
     movl 4(%esp), %eax     
     movl %ebx, oEBX(%eax)
     movl %ecx, oECX(%eax)
@@ -14,12 +15,15 @@ swapctx:
     movl %ebp, oEBP(%eax)
     movl %esp, oESP(%eax)
     
+    /* save rip */
     movl (%esp), %ecx 
     movl %ecx, oEIP(%eax)
 
+    /* setup registers from second parameter */
     movl  8(%esp), %eax 
 
     movl oESP(%eax), %esp
+    /* setup rip */
     movl oEIP(%eax), %ecx
     movl %ecx, (%esp)  
 
@@ -30,10 +34,12 @@ swapctx:
     movl oESI(%eax), %esi
     movl oEBP(%eax), %ebp
 
+    /* clear rax to indicate success */
+    xorl %eax, %eax
     ret
     
 #elif defined(__x86_64__)
-    /*save registers */
+    /* save registers to first parameter */
     movq %rbx, oRBX(%rdi)
     movq %rbp, oRBP(%rdi)
     movq %r12, oR12(%rdi)
@@ -55,7 +61,7 @@ swapctx:
     movq %rsp, oRSP(%rdi)
 
 
-    /* setup registers*/
+    /* setup registers from second parameter */
     movq oRBX(%rsi), %rbx
     movq oRBP(%rsi), %rbp
     movq oR12(%rsi), %r12
