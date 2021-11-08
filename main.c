@@ -6,11 +6,14 @@ struct args{
 
 void fun(struct coroutine *cor)
 {
-    struct args *parg = (struct args *)(cor->args);
-    int start = parg->n;
-    int i;
+    int i, index;
+    struct args *parg;
+
+    parg = (struct args *)(cor->args);
+    index = parg->n;
+
     for (i = 0; i< 3; ++i) {
-        printf("i %d\n", start + i);
+        printf("i %d\n", index + i);
         coroutine_yield(cor);
     }
 }
@@ -27,7 +30,6 @@ int main()
     coroutine_new(sch, fun, &arg1);
     coroutine_new(sch, fun, &arg2);
     coroutine_new(sch, fun, &arg3);
-
 
     schedule_run(sch);
 

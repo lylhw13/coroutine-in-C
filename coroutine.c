@@ -30,6 +30,7 @@ void schedule_run(struct schedule *sch)
 void schedule_free(struct schedule *sch)
 {
     struct coroutine *cor1, *cor2;
+
     cor1 = STAILQ_FIRST(&(sch->head));
     while (cor1 != NULL) {
         cor2 = STAILQ_NEXT(cor1, entries);
@@ -50,7 +51,6 @@ void coroutine_new(struct schedule* sch, coroutine_fun fun, void *args)
     cor->size = 0;
     cor->status = COROUTINE_READY;
     STAILQ_INSERT_TAIL(&(sch->head), cor, entries);
-
 }
 
 void coroutine_yield(struct coroutine *cor)
@@ -75,8 +75,6 @@ void coroutine_yield(struct coroutine *cor)
 
     swapctx(&(cor->ctx), &(cor->sch->ctx));
 }
-
-
 
 void coroutine_free(struct coroutine *cor)
 {
@@ -134,6 +132,7 @@ static void mainfun(struct coroutine*cor)
 {
     cor->fun(cor);
     coroutine_free(cor);
+    
     /* return the contorl to schedule */
     swapctx(&(cor->ctx), &(cor->sch->ctx));
 }

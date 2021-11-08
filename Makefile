@@ -1,5 +1,9 @@
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -Wall
+
+ifdef DEBUG
+CFLAGS += -g
+endif
 
 LIBS = 
 
@@ -17,3 +21,5 @@ main32.out: $(SRCFILE)
 
 clean:
 	rm $(PROM)
+
+# make DEBUG=1

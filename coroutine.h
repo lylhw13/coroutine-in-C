@@ -8,11 +8,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 #define COROUTINE_READY     0
 #define COROUTINE_RUNNING   1
 #define COROUTINE_SUSPEND   2
-#define COROUTINE_DEAD      3       
 
 #define STACK_SIZE 1024*1024
 
