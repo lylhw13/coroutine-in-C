@@ -87,7 +87,7 @@ void coroutine_free(struct coroutine *cor)
 void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 {
     void *sp;
-    void **para_addr, **ip_addr;
+    void **para_addr;
 
     sp = (void *)(ctx->ss_sp + ctx->ss_size - sizeof(void *));
     /* align stack and make space */
@@ -96,10 +96,6 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
     /* para in the stack */
     para_addr = (void**)(sp - sizeof(void *)*2);
     *para_addr = para1;
-
-    /* make the esp point to the function ready to run  */
-    ip_addr = (void **)(sp - sizeof(void *)*4);
-    *ip_addr = fun;
 
     ctx->regs[oEIP/psize] = fun;
     ctx->regs[oESP/psize] = (void*)(sp - sizeof(void *)*4);
@@ -110,15 +106,10 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
 {
     void *sp;
-    void **ip_addr; /* instruction pointer */
 
     sp = (void *)(ctx->ss_sp + ctx->ss_size - sizeof(void *));
     /* align stack and make space */
     sp = (char*)((unsigned long)sp & -16L);
-
-    /* make the rsp point to the function ready to run  */
-    ip_addr = (void **)sp;
-    *ip_addr = fun;
 
     ctx->regs[oRDI/psize] = para1;
     ctx->regs[oRIP/psize] = fun;
