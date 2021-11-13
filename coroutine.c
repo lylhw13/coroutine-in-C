@@ -61,6 +61,11 @@ void coroutine_yield(struct coroutine *cor)
 
     top = cor->sch->stack + STACK_SIZE;
     length = top - &curr;
+
+    if (&curr < cor->sch->stack) {
+        LOGD("Coroutine stack is overflow\n");
+        exit(EXIT_FAILURE);
+    }
     
     if (cor->size < length) {
         if (cor->stack != NULL)

@@ -15,7 +15,7 @@ swapctx:
     movl %ebp, oEBP(%eax)
     movl %esp, oESP(%eax)
     
-    /* save rip */
+    /* save eip */
     movl (%esp), %ecx 
     movl %ecx, oEIP(%eax)
 
@@ -23,7 +23,7 @@ swapctx:
     movl  8(%esp), %eax 
 
     movl oESP(%eax), %esp
-    /* setup rip */
+    /* setup eip */
     movl oEIP(%eax), %ecx
     movl %ecx, (%esp)  
 
