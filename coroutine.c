@@ -90,7 +90,7 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
     void **para_addr;
 
     sp = (void *)(ctx->ss_sp + ctx->ss_size - sizeof(void *));
-    /* align stack and make space */
+    /* align stack */
     sp = (char*)((unsigned long)sp & -16L);
 
     /* para in the stack */
@@ -108,7 +108,7 @@ void makectx(struct context *ctx, void(*fun)(struct coroutine*cor), void *para1)
     void *sp;
 
     sp = (void *)(ctx->ss_sp + ctx->ss_size - sizeof(void *));
-    /* align stack and make space */
+    /* align stack */
     sp = (char*)((unsigned long)sp & -16L);
 
     ctx->regs[oRDI/psize] = para1;

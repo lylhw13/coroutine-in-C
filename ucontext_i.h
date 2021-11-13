@@ -1,3 +1,4 @@
+/* x86 registers */
 #define oEAX 0
 #define oEBX 4
 #define oECX 8
@@ -8,7 +9,7 @@
 #define oESP 28
 #define oEIP 32
 
-
+/* x86-64 registers */
 #define oRAX 0
 #define oRBX 8
 #define oRCX 16

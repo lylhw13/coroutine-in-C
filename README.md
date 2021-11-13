@@ -10,3 +10,5 @@ A stackful, asymmetric coroutine in C.
 - 实现了基础的协程功能，能够说明协程的基本原理。
 - 通过汇编实现协程的上下文切换。
 - 通过一个就绪队列，实现协程之间的自动切换。
+
+Work on Ubuntu 20, gcc version 9.3.0.
