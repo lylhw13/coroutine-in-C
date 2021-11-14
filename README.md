@@ -12,3 +12,5 @@ A stackful, asymmetric coroutine in C.
 - 通过一个就绪队列，实现协程之间的自动切换。
 
 Work on Ubuntu 20, gcc version 9.3.0.
+
+项目详细介绍，请阅读[人人都可以写协程：一个基于汇编的协程实现](https://blog.csdn.net/m0_47696151/article/details/121297557).
