@@ -151,5 +151,4 @@ void coroutine_resume(struct coroutine *cor)
         swapctx(&(cor->sch->ctx), &(cor->ctx));
         return;
     }
-    // exit(1);
 }
